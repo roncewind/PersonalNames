@@ -1,7 +1,7 @@
 # -----------------------------------------------------------------------------
-# Read wikidata source and create data file of biznames.
+# Read wikidata source and create data file of names.
 # Example usage:
-# pbzip2 -d -c -m200 ~/data/BizNamesData/wikidata-20250526-all.json.bz2| python extract_wikidata_biznames.py -i - -o 20250526_biznames_wikidata.csv 2> 20250526_err.out
+# pbzip2 -d -c -m200 /data/wikidata-20250526-all.json.bz2| python extract_wikidata_names.py -i - -o 20250526_names_wikidata.csv 2> 20250526_err.out
 # Output format:
 #   wikidata id,canonical name,language code,name
 #
@@ -42,7 +42,77 @@ status_print_lines = 10000
 BLACKLIST_CANDIDATES = {}
 
 INSTANCE_OF_BLACKLIST = {
+    "Q171": "wiki",
+    "Q7397": "software",
+    "Q40614": "fossil",
+    "Q41298": "magazine",
+    "Q41710": "ethnic group",
+    "Q43229": "organization",
+    "Q43616": "mummy",
+    "Q163740": "nonprofit organization",
+    "Q215380": "musical group",
+    "Q474968": "anonymous master",
+    "Q1052390": "most recent common ancestor",
+    "Q1412596": "simulacrum",
     "Q1747829": "notname",
+    "Q2707384": "side project",
+    "Q4233718": "anonymous",
+    "Q10648343": "duo",
+    "Q10855061": "archaeological find",
+    "Q12737077": "occupation",
+    "Q13442814": "scholarly article",
+    "Q13473501": "collective",
+    "Q15097084": "heritage register",
+    "Q18347143": "Hominin fossil",
+    "Q18356450": "unidentified decedent",
+    "Q105525662": "human remains",
+    "Q106892475": "research group",
+    "Q119579738": "M-8-1",
+    "Q17558136": "YouTube channel",
+    "Q16334295": "group of humans",
+    "Q1241025": "research group",
+    "Q673899": "study group",
+    "Q4830453": "business",
+    "Q14946528": "conflation",
+    "Q2088357": "musical ensembel",
+    "Q281643": "musical trio",
+    "Q55753593": "sibling trio",
+    "Q1165905": "sexual identity",
+    "Q783794": "company",
+    "Q2927074": "internet meme",
+    "Q9621": "human skeleton",
+    "Q199414": "bog body",
+    "Q216353": "title",
+    "Q7558495": "solo musical project",
+    "Q7881": "skeleton",
+    "Q839954": "archaeological site",
+    "Q220659": "archaeological artefact",
+    "Q26513": "human fetus",
+    "Q1656682": "event",
+    "Q8436": "family",
+    "Q16519632": "scientific organization",
+    "Q4164871": "position",
+    "Q968159": "art movement",
+    "Q486972": "human settlement",
+    "Q10737": "suicide",
+    "Q1318274": "placeholder name",
+    "Q11664239": "music unit",
+    "Q1077857": "persona",
+    "Q132821": "murder",
+    "Q844482": "killing",
+    "Q814254": "feature",
+    "Q35779580": "possibly invalid entry requiring further references",
+    "Q1190554": "occurrence",
+    "Q72398691": "video game news website",
+    "Q3235597": "crucifixion",
+    "Q47461344": "written work",
+    "Q1792356": "art book publisher",
+    "Q12888920": "selection",
+    "Q532": "village",
+    "Q109115381": "blockchain game",
+    "Q35127": "website",
+    "Q24238356": "unknown",
+    "Q9212979": "musical duo",
     # "Q60539479": "positive emotion",
     # "Q331769": "mood",
     # "Q41537118": "emotional state",
@@ -55,7 +125,6 @@ INSTANCE_OF_BLACKLIST = {
     # "Q106974458": "long-series books",
     # "Q712378": "organ",
     # "Q112826905": "class of anatomical entity",
-    # "Q47461344": "written work",
     # "Q59541917": "Wikimedia topic category",
     # "Q4167836": "Wikimedia category",
     # "Q17362920": "Wikimedia duplicated page",
@@ -230,6 +299,12 @@ def process_json_line_whitelisted(line):
                     local_name = prop["value"]
                     file_output_dict[local_name] = [entity["id"], en_name, lang]
                     #   out_string += f' : {local_name}({prop["language"]})[{rune_count}]'
+        nicknames = entity.get("claims", {}).get("P1449")
+        if nicknames:
+            for nickname in nicknames:
+                nick = nickname.get("mainsnak", {}).get("datavalue", {}).get("value", {}).get("text")
+                lang = nickname.get("mainsnak", {}).get("datavalue", {}).get("value", {}).get("language")
+                file_output_dict[nick] = [entity["id"], en_name, lang]
         debug(out_string)
         return file_output_dict
 
@@ -336,7 +411,7 @@ def read_file(file_handle, output_file_path):
 # Main
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        prog="extract_wikidata_biznames", description="Creates CSV file business names."
+        prog="extract_wikidata_names", description="Creates CSV file personal names."
     )
 
     parser.add_argument("-i", "--infile", action="store", required=True)
@@ -377,4 +452,4 @@ if __name__ == "__main__":
     for k, v in BLACKLIST_CANDIDATES.items():
         print(f"{k}: {v}")
 
-# pbzip2 -d -c -m200 /data/BizNamesData/wikidata-20250714-all.json.bz2| python extract_wikidata_biznames.py -i - -o ./data/20250714_names_wikidata.csv 2> 20250714_err.out
+# pbzip2 -d -c -m200 /data/wikidata-20250714-all.json.bz2| python extract_wikidata_names.py -i - -o ./data/20250714_names_wikidata.csv 2> 20250714_err.out
