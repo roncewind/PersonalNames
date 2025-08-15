@@ -41,6 +41,8 @@ cosine similarity, to other names for the same person.
 ## Compare a couple of names using a model:
 
 `compare_names.py` simple example on how one might use the model to compare two names against each other.
+
+
 ## data source, possibilities:
 
 - sigpwned - names by country, with romanization
