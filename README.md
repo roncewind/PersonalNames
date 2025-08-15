@@ -1,6 +1,46 @@
 # PersonalNames
 Tinkerspace for personal name clustering
 
+
+Purpose of the experiment is to see if we can created embeddings based on
+personal names such that a personal name in any language is similar, using
+cosine similarity, to other names for the same person.
+
+## Find biznames in Wikidata extract:
+
+`extract_wikidata_names.py` reads from a wikidata extract and creates a CSV file of personal names. Particularly translated versions.
+
+## Analyze personal names from Wikidata (optional, playground)
+
+`analyze_wikidata_extract.py` analyzes the CSV file created from a wikidata extract and reports some stats.
+
+## Split training data into triplets files for training, validation and testing
+
+`split_training_data.py` creates personal name triplets and splits data in to training, validation, and test sets in JSONL files.
+
+## Train a model using data created
+
+`train_sbert_contrastive.py` fine-tune a sentence transformer model for out specific use case.
+
+## Test trained model
+
+`test_triplets.py` runs the test set of triplets in it's JSONL file against a fine-tuned model and reports with various stats and graphs.
+
+## Create hard negative training set
+
+`mine_hard_negatives.py` mines the training set using a fine-tuned model to create a "hard negative" training set in a JSONL file. This further fine-tunes the model. One should set the margin parameter to less that the what the training loop used.
+
+## Hard negative sanity test
+
+`hard_negative_sanity.py` analyzes the hard negative training set and reports various statistics.
+
+## Re-train with hard negatives
+
+`train_sbert_contrastive.py` same as the training loop, but give it the additional `--hard_path` parameter pointing to the hard negative training set JSONL file.
+
+## Compare a couple of names using a model:
+
+`compare_names.py` simple example on how one might use the model to compare two names against each other.
 ## data source, possibilities:
 
 - sigpwned - names by country, with romanization
@@ -67,8 +107,6 @@ Tinkerspace for personal name clustering
 
 ## Synthetic data
 
-
-
 ### Name variants
 
 1) Element variations
@@ -95,4 +133,251 @@ Tinkerspace for personal name clustering
     e) Element segmentation, e.g. Mohamed Amin ~ Mohammedamin
 
 Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_for_Matching_Culturally_Diverse_Romanized_Person_Names
+
+# 1) Extra variation types to consider
+
+* **Orthography & Unicode**
+
+  * Diacritics dropped/added (José → Jose), ß→ss, å/ä/ö→a/o, ı↔i (Turkish), ё→е (Russian), ğ/ş (Turkish), ł (Polish).
+  * **Unicode normalization** issues (NFC/NFKD), zero-width joiners, curly vs straight apostrophes (O’Connor/O'Connor), full-width vs half-width (Ｊｏｓｅ ↔ Jose).
+  * **Homoglyphs** across scripts (Latin “a” vs Cyrillic “а”, “e” vs “е”, “p” vs “р”, “H” vs Greek “Η”).
+  * All-caps, Title Case, random case.
+
+* **Punctuation, spacing, hyphenation**
+
+  * Hyphen join/split (Jean-Paul ↔ Jean Paul), apostrophe drop or duplicate (D’Angelo ↔ Dangelo), extra spaces, double spaces, trailing/leading spaces, mid-token spaces (Mo hammed).
+
+* **Script & transliteration quirks**
+
+  * Multiple romanization standards (Zhāng → Zhang/Chang; Kyiv → Kiev).
+  * Arabic/Persian: ta marbūṭa ة rendered as “h”, yaa’/alif maqsūra (ى/ي), hamza placement, vowel omission.
+  * Japanese: kanji ↔ kana ↔ romaji; long vowels (ō→ou), name order (surname-first vs given-first).
+  * Chinese: hyphenation in given names (Xi-Wei ↔ Xiwei), spacing rules.
+
+* **Cultural structure**
+
+  * **Mononyms** (Indonesia, parts of India): “Sukarno”.
+  * **Patronymics/matronymics**: Russian (-ovich/-ovna), Icelandic (Jónsdóttir), Arabic name chains (kunya Abu…, nasab bin/ibn, nisba al-).
+  * **Particles and nobiliary markers**: van/de/da/di/del/della/du, O’/Mc/Mac; case sensitivity (van Gogh vs Van Gogh).
+  * **Iberian double surnames** (paternal + maternal), Brazilian order differences, optional “y/de/del”.
+
+* **Titles & suffixes**
+
+  * Mr./Mrs./Dr./Haji/Hajjah, Esq., Jr./Sr./III, academic/royal/religious honorifics interleaved anywhere.
+
+* **Data-entry / system artifacts**
+
+  * **Keyboard adjacency** errors (mobile & desktop layouts), swapped neighboring letters, repeated letters.
+  * **OCR confusions**: rn↔m, l↔1, O↔0, B↔8, cl↔d, I↔l, c↔e, t↔f, é→e, diacritic loss, “.”→“,”, random insertions.
+  * **Truncation** at fixed field widths, mid-token clipping, ellipsis, dropped suffixes.
+  * **Field contamination** (name field contains extra tokens like “N/A”, “—”, emails, dates), **placeholders** beyond FNU/LNU/UNK (TBD, ???, NONE).
+
+* **Phonetic drift**
+
+  * th↔t/d (Sathya→Satya), v↔w (Venkata↔Wenkata), y/j/i (Yosef/Josef/Iosef), ch/š/ś → various Latinizations, ll↔y (Spanish), dh/ḥ/kh Arabic clusters.
+
+* **Alias classes**
+
+  * **Stage/clerical names** (e.g., “Pope Francis” vs birth name), courtesy names, pen names.
+  * **Register-driven initials** (South India: “R. Karthik” where “R” is father’s name), institutional short forms (“Md” for Muhammad, “Ma.” for María in the Philippines).
+
+# 2) Options for generating realistic synthetic data
+
+## A) Rule-based + probabilistic “error channels” (high control, low risk)
+
+Create a library of transforms with per-language weights. Sample 0–3 transforms per name to keep noise realistic. Examples:
+
+* **Diacritic folding / casefolding / width folding**
+* **Keyboard adjacency substitutions** (build layouts for QWERTY, AZERTY, QWERTZ, mobile)
+* **OCR confusion substitutions**
+* **Particle rules** (drop/join/re-case de/da/van/al/bin, split/merge)
+* **Hyphen/apostrophe/space join-split**
+* **Token reorderings** (GN-SN ↔ SN-GN, permutations within 2–3 tokens)
+* **Truncation** policies (head/tail/mid with sensible min lengths)
+* **Script transliteration cycle** (Latin→Cyrillic→Latin, Arabic↔Latin with multiple schemes)
+* **Nicknames & diminutives** via curated maps (Robert→Bob/Rob; Joseph→Giuseppe/José/Yosef/Youssef)
+* **Placeholders/titles** insertion/removal
+
+Use per-locale profiles so, e.g., Turkish dotted-i or Spanish double surnames trigger only where appropriate.
+
+## B) Phonetic/transliteration-driven variants (very useful)
+
+* Convert to **phonetic codes** (Double Metaphone, NYSIIS, Daitch–Mokotoff) then regenerate plausible spellings from the code (or pick from a lookup). Great for same-sound/different-spelling negatives and positives.
+* **G2P → perturb phonemes → P2G** to induce sound-preserving misspellings.
+* **Transliteration cycling** with multiple standards to create realistic cross-script drift.
+
+## C) Dictionary-driven alias expansion (low effort, targeted)
+
+* Curate nickname/diminutive/translation tables per language. Tag each mapping with confidence to avoid aggressive expansion.
+* Add culture-specific patterns (Arabic kunya, Russian patronymic expansion, South Indian initial expansion).
+
+## D) Learned corruption models (medium effort, flexible)
+
+* **Seq2seq “noiser”**: train a small transformer to map clean name → corrupted name using your rule-based outputs as supervision; then sample from it. This gives you diversity without hand-tuning every rule.
+* **Denoising autoencoder**: train to reconstruct clean from corrupted; during generation, run clean → latent → decode with noise to sample corruptions.
+* **Masked-LM** tuned on names: randomly mask characters/subtokens and let it predict plausible replacements (constrained to same script).
+
+## E) Rendering-based OCR corruption (heavy, most realistic)
+
+Render names with varied fonts/blur/noise, run OCR (e.g., Tesseract) to capture truly realistic OCR mistakes. This is compute-heavier but gold for OCR error profiles.
+
+## F) Online augmentation during triplet mining (training-aware)
+
+When forming triplets:
+
+* Generate **positives** by applying light, label-preserving transforms to the anchor (diacritic folding, particle join, nickname, transliteration cycle).
+* Generate **semi-hard negatives** by:
+
+  * same surname, nearby given name (Levenshtein 1–2),
+  * same initials, different given/surname,
+  * phonetic collision but different dictionary identity,
+  * transliteration collisions.
+* Periodically **re-mine hard negatives** from the current embedding space with constraints (must not be same entity or alias cluster).
+
+TODOL:
+
+* Tag each synthetic example with the applied transform list; you can later weight or filter during training.
+* Keep the **noise rate modest** (e.g., ≤30–40% of examples augmented, 0–2 transforms each). Too much noise can collapse the embedding geometry.
+* **Language-aware profiles**: choose transform sets and weights by script/locale.
+* Build **gold “same-person” clusters** from Wikidata IDs/aliases; generate positives within cluster, negatives across clusters but near by string/phonetics.
+* Consider **Supervised Contrastive Loss** in addition to triplet loss for stability with many positives per anchor.
+* For hard negatives, add a small **margin schedule** and periodically re-mine neighbors to avoid overfitting to stale hard negatives.
+
+
+
+
+---
+
+# Using **τ (tau)** with PostgreSQL/pgvector.
+
+ The only trick is remembering that pgvector's **cosine operator** returns a **distance**, not similarity.
+
+## Key mapping
+
+* Let **similarity** $s = \cos(\mathbf{q}, \mathbf{x}) \in [-1, 1]$.
+* pgvector's **cosine distance** operator `<=>` returns
+  $d = 1 - s \in [0, 2]$.
+* Your decision rule "match if $s \ge \tau$" becomes
+  **"match if $d \le 1 - \tau$"**.
+
+Example: if $\tau = 0.3016$, then accept when `cosine_distance ≤ 1 - 0.3016 = 0.6984`.
+
+---
+
+## Option A: Top-K then apply τ in SQL (simple & index-friendly)
+
+This is the common pattern with IVFFlat/HNSW indexes: get the nearest **K** and filter by τ.
+
+```sql
+-- $1 = query vector, $2 = top_k, $3 = tau
+WITH params AS (
+  SELECT $1::vector AS qv, $2::int AS k, $3::float8 AS tau
+)
+SELECT
+  e.id,
+  e.group_id,
+  e.name,
+  e.language,
+  (e.embedding <=> p.qv)       AS cosine_distance,
+  1 - (e.embedding <=> p.qv)   AS cosine_similarity
+FROM embeddings e, params p
+ORDER BY e.embedding <=> p.qv
+LIMIT p.k;
+```
+
+Then in your app, keep only rows with `cosine_similarity >= tau`.
+(You can also add a `WHERE` clause here; see Option B.)
+
+**Why this is nice:** `ORDER BY embedding <=> q LIMIT k` is exactly what pgvector's approximate indexes are built to accelerate.
+
+---
+
+## Option B: Apply τ inside SQL (distance threshold)
+
+Same query, but **also** filter by your τ → distance threshold $1-\tau$:
+
+```sql
+-- $1 = query vector, $2 = (1 - tau) as a distance cutoff, $3 = top_k
+WITH params AS (
+  SELECT $1::vector AS qv, $2::float8 AS max_dist, $3::int AS k
+)
+SELECT
+  e.id,
+  e.group_id,
+  e.name,
+  e.language,
+  (e.embedding <=> p.qv)       AS cosine_distance,
+  1 - (e.embedding <=> p.qv)   AS cosine_similarity
+FROM embeddings e, params p
+WHERE (e.embedding <=> p.qv) <= p.max_dist
+ORDER BY e.embedding <=> p.qv
+LIMIT p.k;
+```
+
+For $\tau = 0.3016$, pass `max_dist = 0.6984`.
+
+**Note:** With IVFFlat/HNSW, the index is primarily used for the `ORDER BY … LIMIT`. The `WHERE` cutoff is applied as a filter; performance is still good in practice, but the pure top-K pattern (Option A) is the most index-friendly.
+
+---
+
+## Python example (psycopg)
+
+```python
+import numpy as np
+import psycopg
+
+TAU = 0.3016
+TOP_K = 10
+
+# qvec must be a 1-D float list the same length as your column's dimension
+qvec = model.encode([query_name], normalize_embeddings=True)[0].astype(np.float32).tolist()
+
+sql = """
+WITH params AS (
+  SELECT %s::vector AS qv, %s::float8 AS max_dist, %s::int AS k
+)
+SELECT id, group_id, name, language,
+       (embedding <=> p.qv) AS cosine_distance,
+       1 - (embedding <=> p.qv) AS cosine_similarity
+FROM embeddings e, params p
+WHERE (embedding <=> p.qv) <= p.max_dist
+ORDER BY embedding <=> p.qv
+LIMIT p.k;
+"""
+
+with psycopg.connect(conninfo) as conn, conn.cursor() as cur:
+    cur.execute(sql, (qvec, 1.0 - TAU, TOP_K))
+    rows = cur.fetchall()
+    # rows already honor tau; if you used Option A, filter here instead
+```
+
+---
+
+## Indexing tips (pgvector)
+
+* Use cosine ops in the index:
+
+  ```sql
+  -- Fast approximate
+  CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+
+  -- Or HNSW (often great out-of-the-box)
+  CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 200);
+  ```
+
+* Tune probes (IVFFlat):
+
+  ```sql
+  SET ivfflat.probes = 10;   -- try 5–20 for recall/speed tradeoff
+  ```
+
+* Store **float4/float8** vectors; you **don't need** to pre-normalize for `<=>` to work, but normalizing in your app makes cosine consistent across systems and lets you switch to inner-product (`IndexFlatIP`) elsewhere without surprises.
+
+---
+
+## PostgreSQL bottom-line
+
+* pgvector's `<=>` returns **cosine distance**, so threshold by **`1 - τ`**.
+* **Top-K order** then filter by τ is standard; adding a distance `WHERE` is fine too.
+* Keep your embeddings normalized and your τ versioned with the model, and you're good to go.
 
