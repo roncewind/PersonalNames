@@ -748,13 +748,13 @@ def train(model, training_dataloader, validation_dataloader, validation_set, gro
         retrieval_stats = evaluate_retrieval_faiss(model, validation_set, Ks=(1, 5, 10))
         tqdm.write(
             "    📊 Validation "
-            f"ROC-AUC={pair_stats['roc_auc']:.4f} "
-            f"PR-AUC={pair_stats['pr_auc']:.4f} "
-            f"f1@τ={pair_stats['f1_at_tau']:.4f} "
-            f"ACC@τ={pair_stats['acc_at_tau']:.4f} "
-            f"τ={pair_stats['tau']:.4f} "
-            f"R@1={retrieval_stats['R@1']:.3f} R@5={retrieval_stats['R@5']:.3f} R@10={retrieval_stats['R@10']:.3f} "
-            f"(pairs={pair_stats['n_pairs']}, queries={retrieval_stats['queries']}, gallery={retrieval_stats['gallery']})"
+            f"ROC-AUC={pair_stats['roc_auc']:.4f} | "
+            f"PR-AUC={pair_stats['pr_auc']:.4f} | "
+            f"f1@τ={pair_stats['f1_at_tau']:.4f} | "
+            f"ACC@τ={pair_stats['acc_at_tau']:.4f} | "
+            f"τ={pair_stats['tau']:.4f} | "
+            f"R@1={retrieval_stats['R@1']:.3f} R@5={retrieval_stats['R@5']:.3f} R@10={retrieval_stats['R@10']:.3f} | "
+            f"(pairs={pair_stats['n_pairs']:,}, queries={retrieval_stats['queries']:,}, gallery={retrieval_stats['gallery']:,})"
         )
         if (epoch + 1) % tsne_every == 0:
             plot_tsne(model, groups, path=os.path.join(output_path, "analysis"), epoch=epoch)

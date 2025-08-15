@@ -107,7 +107,7 @@ def plot_similarity_histogram(positive_sims: np.ndarray, negative_sims: np.ndarr
 
 
 # -----------------------------------------------------------------------------
-# evaluate the model while training
+# evaluate the model: F1, average gap, violation rate, tau, etc
 def evaluate_triplet_model(model, dataloader, margin, path):
     model.eval()
     device = model.device
@@ -403,7 +403,7 @@ def evaluate_retrieval_faiss(model, val_triplets, Ks=(1, 5, 10), batch_query=819
 
     # Batched nearest neighbor search
     extra = 5  # fetch a few extra to survive filtering
-    for start in tqdm(range(0, len(uniq_q), batch_query), initial=0, desc="Evaluating", leave=True):
+    for start in tqdm(range(0, len(uniq_q), batch_query), initial=0, desc="Progress", leave=True):
         end = min(start + batch_query, len(uniq_q))
         # Distances, Indices are returned from index.search.
         _, Indices = index.search(Q[start:end], maxK + extra)  # type: ignore[call-arg]  # [B,K+extra] scores/indices
