@@ -516,7 +516,7 @@ if __name__ == "__main__":
         f"ACC@τ={pair_stats['acc_at_tau']:.4f} | "
         f"τ={pair_stats['tau']:.4f} | "
         f"R@1={retrieval_stats['R@1']:.3f} R@5={retrieval_stats['R@5']:.3f} R@10={retrieval_stats['R@10']:.3f} | "
-        f"(pairs={pair_stats['n_pairs']}, queries={retrieval_stats['queries']}, gallery={retrieval_stats['gallery']})"
+        f"(pairs={pair_stats['n_pairs']:,}, queries={retrieval_stats['queries']:,}, gallery={retrieval_stats['gallery']:,})"
     )
 
 # python test_triplets.py --model_path output/20250714/FINAL-fine_tuned_model --jsonl_path output/20250714/test_triplets.jsonl --device cuda --batch_size 128 --out_path output/20250714
