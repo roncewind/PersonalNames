@@ -111,81 +111,106 @@ cosine similarity, to other names for the same person.
 
 ### Name variants
 
-1) Element variations
-    a) Data errors
-        i) Optical Character Recognition errors
-        ii) Typos
-        iii) Truncations
-    b) Name particles
-        i) Segmentation, e.g. Abd Al Rahman ~ Abdal Rahman, De Los Angeles ~ Delosangeles
-        ii) Omission, e.g. of bin in Arabic names or de in Hispanic names.
-    c) Short forms
-        i) Abbreviations, e.g. Muhammad ~ Mhd
-        ii) Initials, e.g. John Smith ~ J Smith
-    d) Spelling variations
-        i) Alternate spellings, e.g. Jennifer ~ Jenifer
-        ii) Transliteration, e.g. Husayn ~ Husein
-    e) Nicknames and diminutives, e.g. Robert ~ Bob
-    f) Translation variants, e.g. Joseph ~ Giuseppe
-2) Structural variations
-    a) Additions/deletions, e.g. John Smith ~ John Charles Smith
-    b) Fielding variation: division of full name into surname and given name, or swapping given name and surname
-    c) Permutations, e.g. Clara Lucia Garcia ~ Lucia Clara Garcia
-    d) Placeholders: non-name tokens like FNU, LNU, UNK
-    e) Element segmentation, e.g. Mohamed Amin ~ Mohammedamin
+1. Element variations
+    - Data errors
+        1. Optical Character Recognition errors
+        1. Typos
+        1. Truncations
+    - Name particles
+        1. Segmentation, e.g. Abd Al Rahman ~ Abdal Rahman, De Los Angeles ~ Delosangeles
+        1. Omission, e.g. of bin in Arabic names or de in Hispanic names.
+    - Short forms
+        1. Abbreviations, e.g. Muhammad ~ Mhd
+        1. Initials, e.g. John Smith ~ J Smith
+    - Spelling variations
+        1. Alternate spellings, e.g. Jennifer ~ Jenifer
+        1. Transliteration, e.g. Husayn ~ Husein
+    - Nicknames and diminutives, e.g. Robert ~ Bob
+    - Translation variants, e.g. Joseph ~ Giuseppe
+1. Structural variations
+    - Additions/deletions, e.g. John Smith ~ John Charles Smith
+    - Fielding variation: division of full name into surname and given name, or swapping given name and surname
+    - Permutations, e.g. Clara Lucia Garcia ~ Lucia Clara Garcia
+    - Placeholders: non-name tokens like FNU, LNU, UNK
+    - Element segmentation, e.g. Mohamed Amin ~ Mohammedamin
 
 Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_for_Matching_Culturally_Diverse_Romanized_Person_Names
 
-# 1) Extra variation types to consider
+## 1) Extra variation types to consider
 
-* **Orthography & Unicode**
+### **Orthography & Unicode**
 
   * Diacritics dropped/added (José → Jose), ß→ss, å/ä/ö→a/o, ı↔i (Turkish), ё→е (Russian), ğ/ş (Turkish), ł (Polish).
   * **Unicode normalization** issues (NFC/NFKD), zero-width joiners, curly vs straight apostrophes (O’Connor/O'Connor), full-width vs half-width (Ｊｏｓｅ ↔ Jose).
   * **Homoglyphs** across scripts (Latin “a” vs Cyrillic “а”, “e” vs “е”, “p” vs “р”, “H” vs Greek “Η”).
   * All-caps, Title Case, random case.
 
-* **Punctuation, spacing, hyphenation**
+### **Punctuation, spacing, hyphenation**
 
-  * Hyphen join/split (Jean-Paul ↔ Jean Paul), apostrophe drop or duplicate (D’Angelo ↔ Dangelo), extra spaces, double spaces, trailing/leading spaces, mid-token spaces (Mo hammed).
+  * Hyphen join/split (Jean-Paul ↔ Jean Paul)
+  * apostrophe drop or duplicate (D’Angelo ↔ Dangelo)
+  * extra spaces, double spaces, trailing/leading spaces, mid-token spaces (Mo hammed)
 
-* **Script & transliteration quirks**
+### **Script & transliteration quirks**
 
   * Multiple romanization standards (Zhāng → Zhang/Chang; Kyiv → Kiev).
   * Arabic/Persian: ta marbūṭa ة rendered as “h”, yaa’/alif maqsūra (ى/ي), hamza placement, vowel omission.
   * Japanese: kanji ↔ kana ↔ romaji; long vowels (ō→ou), name order (surname-first vs given-first).
   * Chinese: hyphenation in given names (Xi-Wei ↔ Xiwei), spacing rules.
 
-* **Cultural structure**
+#### Transliteration in general
+
+  * Python packages for transliteration
+    - [PyICU](https://pypi.org/project/pyicu/)  - 671 different transliterations `icu.Transliterator.getAvailableIDs()`
+      - https://unicode-org.github.io/icu/userguide/transforms/general/
+      - https://gist.github.com/dpk/8325992
+    - [transliterate](https://pypi.org/project/transliterate/) - Armenian, Bulgarian (beta), Georgian, Greek, Macedonian (alpha), Mongolian (alpha), Russian, Serbian (alpha), Ukrainian (beta)
+    - [iuliia](https://pypi.org/project/iuliia/) - 20 Russian transliteration schemas (all major international and national standards). Official Uzbek transliteration schema.
+    - [cyrtranslit](https://pypi.org/project/cyrtranslit/) - Bulgarian, Montenegrin, Macedonian, Mongolian, Russian, Serbian, Tajik, and Ukrainian.
+    - [iso9](https://github.com/cjolowicz/iso9) - Abkhaz, Altay, Belarusian, Bulgarian, Buryat, Chuvash, Karachay-Balkar, Macedonian, Moldavian, Mongolian, Russian, Rusyn, Serbian, Udmurt, Ukrainian, and all Caucasian languages using páločka.
+    - [arabic_buckwalter_transliteration](https://github.com/hayderkharrufa/arabic-buckwalter-transliteration) - arabic
+    - [gimeltra](https://github.com/twardoch/gimeltra) - 20 scripts, specializing in those of Semitic origin, offering a simplified, abjad-only transliteration.
+    - [pykakasi](https://codeberg.org/miurahr/pykakasi) - Japanese in all it's flavors, GPL 3.0!!!?
+    - [pypinyin](https://pypi.org/project/pypinyin/) - Chinese. Does "lazy pinyin" with no diacritics.  `from pypinyin import lazy_pinyin`
+    - [cjklib](https://pypi.org/project/cjklib3/) - For Wade-Giles romanization.
+    - [unidecode](https://pypi.org/project/Unidecode/) - not language specific, strict unicode to ascii "romanitization"
+    - [ai4bharat-transliteration](https://pypi.org/project/ai4bharat-transliteration/) - 21 major languages of the Indian subcontinent.
+    - [transliter](https://github.com/elibooklover/Transliter) - Korean, Japanese, Russian, Ukrainian, Bulgarian, Macedonian, Mongolian, Montenegrin, Serbian, and Tajiki. GPL 2.0 !!!!
+
+  * Python packages not specific to transliteration, but to writing systems:
+    - [alphabetic](https://github.com/Halvani/alphabetic) - retrieving script types of writing systems including alphabets, abjads, abugidas, syllabaries, logographs, featurals as well as Latin script codes. Can be used to classify the language of a given text
+    - [GlotScript](https://github.com/cisnlp/GlotScript) - determines the script (writing system) of input text using ISO 15924.
+
+### **Cultural structure**
 
   * **Mononyms** (Indonesia, parts of India): “Sukarno”.
   * **Patronymics/matronymics**: Russian (-ovich/-ovna), Icelandic (Jónsdóttir), Arabic name chains (kunya Abu…, nasab bin/ibn, nisba al-).
   * **Particles and nobiliary markers**: van/de/da/di/del/della/du, O’/Mc/Mac; case sensitivity (van Gogh vs Van Gogh).
   * **Iberian double surnames** (paternal + maternal), Brazilian order differences, optional “y/de/del”.
 
-* **Titles & suffixes**
+### **Titles & suffixes**
 
   * Mr./Mrs./Dr./Haji/Hajjah, Esq., Jr./Sr./III, academic/royal/religious honorifics interleaved anywhere.
 
-* **Data-entry / system artifacts**
+### **Data-entry / system artifacts**
 
   * **Keyboard adjacency** errors (mobile & desktop layouts), swapped neighboring letters, repeated letters.
   * **OCR confusions**: rn↔m, l↔1, O↔0, B↔8, cl↔d, I↔l, c↔e, t↔f, é→e, diacritic loss, “.”→“,”, random insertions.
   * **Truncation** at fixed field widths, mid-token clipping, ellipsis, dropped suffixes.
   * **Field contamination** (name field contains extra tokens like “N/A”, “—”, emails, dates), **placeholders** beyond FNU/LNU/UNK (TBD, ???, NONE).
 
-* **Phonetic drift**
+### **Phonetic drift**
 
   * th↔t/d (Sathya→Satya), v↔w (Venkata↔Wenkata), y/j/i (Yosef/Josef/Iosef), ch/š/ś → various Latinizations, ll↔y (Spanish), dh/ḥ/kh Arabic clusters.
 
-* **Alias classes**
+### **Alias classes**
 
   * **Stage/clerical names** (e.g., “Pope Francis” vs birth name), courtesy names, pen names.
   * **Register-driven initials** (South India: “R. Karthik” where “R” is father’s name), institutional short forms (“Md” for Muhammad, “Ma.” for María in the Philippines).
 
-# 2) Options for generating realistic synthetic data
+## 2) Options for generating realistic synthetic data
 
-## A) Rule-based + probabilistic “error channels” (high control, low risk)
+### A) Rule-based + probabilistic “error channels” (high control, low risk)
 
 Create a library of transforms with per-language weights. Sample 0–3 transforms per name to keep noise realistic. Examples:
 
@@ -202,28 +227,28 @@ Create a library of transforms with per-language weights. Sample 0–3 transform
 
 Use per-locale profiles so, e.g., Turkish dotted-i or Spanish double surnames trigger only where appropriate.
 
-## B) Phonetic/transliteration-driven variants (very useful)
+### B) Phonetic/transliteration-driven variants (very useful)
 
 * Convert to **phonetic codes** (Double Metaphone, NYSIIS, Daitch–Mokotoff) then regenerate plausible spellings from the code (or pick from a lookup). Great for same-sound/different-spelling negatives and positives.
 * **G2P → perturb phonemes → P2G** to induce sound-preserving misspellings.
 * **Transliteration cycling** with multiple standards to create realistic cross-script drift.
 
-## C) Dictionary-driven alias expansion (low effort, targeted)
+### C) Dictionary-driven alias expansion (low effort, targeted)
 
 * Curate nickname/diminutive/translation tables per language. Tag each mapping with confidence to avoid aggressive expansion.
 * Add culture-specific patterns (Arabic kunya, Russian patronymic expansion, South Indian initial expansion).
 
-## D) Learned corruption models (medium effort, flexible)
+### D) Learned corruption models (medium effort, flexible)
 
 * **Seq2seq “noiser”**: train a small transformer to map clean name → corrupted name using your rule-based outputs as supervision; then sample from it. This gives you diversity without hand-tuning every rule.
 * **Denoising autoencoder**: train to reconstruct clean from corrupted; during generation, run clean → latent → decode with noise to sample corruptions.
 * **Masked-LM** tuned on names: randomly mask characters/subtokens and let it predict plausible replacements (constrained to same script).
 
-## E) Rendering-based OCR corruption (heavy, most realistic)
+### E) Rendering-based OCR corruption (heavy, most realistic)
 
 Render names with varied fonts/blur/noise, run OCR (e.g., Tesseract) to capture truly realistic OCR mistakes. This is compute-heavier but gold for OCR error profiles.
 
-## F) Online augmentation during triplet mining (training-aware)
+### F) Online augmentation during triplet mining (training-aware)
 
 When forming triplets:
 
@@ -236,7 +261,9 @@ When forming triplets:
   * transliteration collisions.
 * Periodically **re-mine hard negatives** from the current embedding space with constraints (must not be same entity or alias cluster).
 
-TODOL:
+---
+
+# TODO:
 
 * Tag each synthetic example with the applied transform list; you can later weight or filter during training.
 * Keep the **noise rate modest** (e.g., ≤30–40% of examples augmented, 0–2 transforms each). Too much noise can collapse the embedding geometry.
@@ -244,8 +271,6 @@ TODOL:
 * Build **gold “same-person” clusters** from Wikidata IDs/aliases; generate positives within cluster, negatives across clusters but near by string/phonetics.
 * Consider **Supervised Contrastive Loss** in addition to triplet loss for stability with many positives per anchor.
 * For hard negatives, add a small **margin schedule** and periodically re-mine neighbors to avoid overfitting to stale hard negatives.
-
-
 
 
 ---
