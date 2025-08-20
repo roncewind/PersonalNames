@@ -15,6 +15,7 @@ from sentence_transformers import InputExample, SentenceTransformer, util
 from sklearn.manifold import TSNE
 from sklearn.metrics import (
     average_precision_score,
+    confusion_matrix,
     f1_score,
     precision_recall_curve,
     precision_recall_fscore_support,
@@ -337,11 +338,25 @@ def evaluate_pairs(model, pairs, batch_size=2048, tau=None, select_tau_mode="max
     acc = float((y_pred == y_true).mean())
     f1_at_tau = f1_score(y_true, y_pred)
 
+    tn, fp, fn, tp = confusion_matrix(y_true, y_pred).ravel()
+    npv = 0.0
+    if (tn + fn) == 0:
+        npv = 0.0  # Avoid division by zero if there are no negative predictions
+    else:
+        npv = tn / (tn + fn)
+    ppv = 0.0
+    if (tp + fp) == 0:
+        ppv = 0.0  # Avoid division by zero if there are no negative predictions
+    else:
+        ppv = tp / (tp + fp)
+
     return {"roc_auc": roc,
             "pr_auc": pr,
             "acc_at_tau": acc,
             "f1_at_tau": f1_at_tau,
             "tau": tau,
+            "npv": npv,
+            "ppv": ppv,
             "n_pairs": int(len(pairs))
             }
 
@@ -512,6 +527,8 @@ if __name__ == "__main__":
         "📊 "
         f"ROC-AUC={pair_stats['roc_auc']:.4f} | "
         f"PR-AUC={pair_stats['pr_auc']:.4f} | "
+        f"PPV={pair_stats['ppv']:.4f} | "
+        f"NPV={pair_stats['npv']:.4f} | "
         f"f1@τ={pair_stats['f1_at_tau']:.4f} | "
         f"ACC@τ={pair_stats['acc_at_tau']:.4f} | "
         f"τ={pair_stats['tau']:.4f} | "

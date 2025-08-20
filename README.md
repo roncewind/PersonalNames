@@ -43,7 +43,7 @@ cosine similarity, to other names for the same person.
 `compare_names.py` simple example on how one might use the model to compare two names against each other.
 
 
-## data source, possibilities:
+## Data source, possibilities:
 
 - sigpwned - names by country, with romanization
     - https://github.com/sigpwned/popular-names-by-country-dataset
@@ -60,27 +60,29 @@ cosine similarity, to other names for the same person.
     - Just code and methodolgy for extracting data from wikidata
     - We can already do this
 
-- openempi
+- ✅ openempi
     - https://github.com/MrCsabaToth/SOEMPI/tree/master/openempi
     - Apache 2.0
     - https://github.com/MrCsabaToth/SOEMPI/blob/master/openempi/conf/name_to_nick.csv
     - https://github.com/MrCsabaToth/SOEMPI/blob/master/openempi/conf/nick_to_name.csv
 
-- onyxrev
+- ✅ onyxrev
     - https://github.com/onyxrev/common_nickname_csv
     - Public domain
 
-- carltonnorthern
+- ✅ carltonnorthern
     - https://github.com/carltonnorthern/nicknames
     - Apache 2.0
 
-- Deron Meranda
+- ✅ Deron Meranda
     - https://web.archive.org/web/20181022154748/https://deron.meranda.us/data/nicknames.txt
     - Public domain??
 
 - brianary
     - https://github.com/brianary/Lingua-EN-Nickname/blob/main/nicknames.txt
     - Public domain??
+    - Many odd nicknames ending in 'E'. EG Agatha	AddE AggE.
+      Not sure why the ending 'E'... could indicate both 'ie' and 'y' variants?
 
 - diminutives.db - NOT USABLE (viral license)
     - https://github.com/HaJongler/diminutives.db
@@ -136,22 +138,25 @@ cosine similarity, to other names for the same person.
 
 Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_for_Matching_Culturally_Diverse_Romanized_Person_Names
 
-## 1) Extra variation types to consider
+## 1) Name variation types to consider:
 
 ### **Orthography & Unicode**
 
-  * Diacritics dropped/added (José → Jose), ß→ss, å/ä/ö→a/o, ı↔i (Turkish), ё→е (Russian), ğ/ş (Turkish), ł (Polish).
-  * **Unicode normalization** issues (NFC/NFKD), zero-width joiners, curly vs straight apostrophes (O’Connor/O'Connor), full-width vs half-width (Ｊｏｓｅ ↔ Jose).
-  * **Homoglyphs** across scripts (Latin “a” vs Cyrillic “а”, “e” vs “е”, “p” vs “р”, “H” vs Greek “Η”).
-  * All-caps, Title Case, random case.
+  * ✅ Diacritics dropped/added (José → Jose), å/ä/ö→a/o, ё→е (Russian), ğ/ş (Turkish).
+  * ✅ **Unicode normalization** issues (NFC/NFKD), ½, zero-width joiners,  full-width vs half-width (Ｊｏｓｅ ↔ Jose).
+  * 🚧(some) **Homoglyphs** across scripts (Latin “a” vs Cyrillic “а”, “e” vs “е”, “p” vs “р”, “H” vs Greek “Η”).
+  * ✅ All-caps, Title Case, random case, capitalize first letter only.
+  * **TODO** - not handled:
+    - ß→ss, ı↔i (Turkish), ł (Polish)?  Homoglyphs????
+    - curly vs straight apostrophes (O’Connor/O'Connor) and other quotes and such
 
 ### **Punctuation, spacing, hyphenation**
 
-  * Hyphen join/split (Jean-Paul ↔ Jean Paul)
+  * ✅ Hyphen join/split (Jean-Paul ↔ Jean Paul)
   * apostrophe drop or duplicate (D’Angelo ↔ Dangelo)
   * extra spaces, double spaces, trailing/leading spaces, mid-token spaces (Mo hammed)
 
-### **Script & transliteration quirks**
+### 🚧(some) **Script & transliteration quirks**
 
   * Multiple romanization standards (Zhāng → Zhang/Chang; Kyiv → Kiev).
   * Arabic/Persian: ta marbūṭa ة rendered as “h”, yaa’/alif maqsūra (ى/ي), hamza placement, vowel omission.
@@ -159,6 +164,10 @@ Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_f
   * Chinese: hyphenation in given names (Xi-Wei ↔ Xiwei), spacing rules.
 
 #### Transliteration in general
+
+  Several python packages are available all with different options and supported languages.
+
+  Short list:
 
   * Python packages for transliteration
     - [PyICU](https://pypi.org/project/pyicu/)  - 671 different transliterations `icu.Transliterator.getAvailableIDs()`
@@ -185,7 +194,7 @@ Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_f
 
   * **Mononyms** (Indonesia, parts of India): “Sukarno”.
   * **Patronymics/matronymics**: Russian (-ovich/-ovna), Icelandic (Jónsdóttir), Arabic name chains (kunya Abu…, nasab bin/ibn, nisba al-).
-  * **Particles and nobiliary markers**: van/de/da/di/del/della/du, O’/Mc/Mac; case sensitivity (van Gogh vs Van Gogh).
+  * 🚧(some) **Particles and nobiliary markers**: van/de/da/di/del/della/du, O’/Mc/Mac; case sensitivity (van Gogh vs Van Gogh).
   * **Iberian double surnames** (paternal + maternal), Brazilian order differences, optional “y/de/del”.
 
 ### **Titles & suffixes**
@@ -194,10 +203,10 @@ Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_f
 
 ### **Data-entry / system artifacts**
 
-  * **Keyboard adjacency** errors (mobile & desktop layouts), swapped neighboring letters, repeated letters.
-  * **OCR confusions**: rn↔m, l↔1, O↔0, B↔8, cl↔d, I↔l, c↔e, t↔f, é→e, diacritic loss, “.”→“,”, random insertions.
-  * **Truncation** at fixed field widths, mid-token clipping, ellipsis, dropped suffixes.
-  * **Field contamination** (name field contains extra tokens like “N/A”, “—”, emails, dates), **placeholders** beyond FNU/LNU/UNK (TBD, ???, NONE).
+  * 🚧(QWERY only) **Keyboard adjacency** errors (mobile & desktop layouts), swapped neighboring letters, repeated letters.
+  * ✅ **Truncation** at fixed field widths, mid-token clipping, ellipsis, dropped suffixes.
+  * 🚧(some) **Field contamination** (name field contains extra tokens like “N/A”, “—”, emails, dates),
+    **placeholders** beyond FNU/LNU/UNK (TBD, ???, NONE).
 
 ### **Phonetic drift**
 
@@ -210,43 +219,48 @@ Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_f
 
 ## 2) Options for generating realistic synthetic data
 
-### A) Rule-based + probabilistic “error channels” (high control, low risk)
+### A) Rule-based + probabilistic “error channels”
 
-Create a library of transforms with per-language weights. Sample 0–3 transforms per name to keep noise realistic. Examples:
-
-* **Diacritic folding / casefolding / width folding**
-* **Keyboard adjacency substitutions** (build layouts for QWERTY, AZERTY, QWERTZ, mobile)
-* **OCR confusion substitutions**
-* **Particle rules** (drop/join/re-case de/da/van/al/bin, split/merge)
-* **Hyphen/apostrophe/space join-split**
-* **Token reorderings** (GN-SN ↔ SN-GN, permutations within 2–3 tokens)
-* **Truncation** policies (head/tail/mid with sensible min lengths)
+* 🚧 library of transforms started, need to work on per-language weights.
+* Using per-locale profiles so, e.g., Turkish dotted-i or Spanish double surnames trigger only where appropriate.
+* How many transforms per name to keep noise realistic? (0-3)?
+* ✅ **Diacritic folding / casefolding / width folding**
+* 🚧(QWERY only) **Keyboard adjacency substitutions** (build layouts for QWERTY, AZERTY, QWERTZ, mobile)
+* 🚧(some)**Particle rules** (drop/join/re-case de/da/van/al/bin, split/merge)
+* ✅ **Hyphen/apostrophe/space join-split**
+* ✅ **Token reorderings** (GN-SN ↔ SN-GN, permutations within 2–3 tokens)
+* ✅ **Truncation** policies (head/tail/mid with sensible min lengths)
 * **Script transliteration cycle** (Latin→Cyrillic→Latin, Arabic↔Latin with multiple schemes)
-* **Nicknames & diminutives** via curated maps (Robert→Bob/Rob; Joseph→Giuseppe/José/Yosef/Youssef)
+* 🚧(mostly English) **Nicknames & diminutives** via curated maps (Robert→Bob/Rob; Joseph→Giuseppe/José/Yosef/Youssef)
 * **Placeholders/titles** insertion/removal
 
-Use per-locale profiles so, e.g., Turkish dotted-i or Spanish double surnames trigger only where appropriate.
 
-### B) Phonetic/transliteration-driven variants (very useful)
+### B) Phonetic/transliteration-driven variants (effort?, very useful)
 
-* Convert to **phonetic codes** (Double Metaphone, NYSIIS, Daitch–Mokotoff) then regenerate plausible spellings from the code (or pick from a lookup). Great for same-sound/different-spelling negatives and positives.
+* Convert to **phonetic codes** (Double Metaphone, NYSIIS, Daitch–Mokotoff) then regenerate plausible spellings from the code (or pick from a lookup). For same-sound/different-spelling negatives and positives.
 * **G2P → perturb phonemes → P2G** to induce sound-preserving misspellings.
 * **Transliteration cycling** with multiple standards to create realistic cross-script drift.
 
-### C) Dictionary-driven alias expansion (low effort, targeted)
+### C) Dictionary-driven alias expansion (medium effort, to source nicknames in other languages)
 
-* Curate nickname/diminutive/translation tables per language. Tag each mapping with confidence to avoid aggressive expansion.
+* 🚧(mostly English) Curate nickname/diminutive/translation tables per language.
+* Tag each mapping with confidence to avoid aggressive expansion?
 * Add culture-specific patterns (Arabic kunya, Russian patronymic expansion, South Indian initial expansion).
 
-### D) Learned corruption models (medium effort, flexible)
+### D) Learned corruption models (large effort?, seems flexible)
+
+Need to look into how to use ML to corrupt data realistically.
 
 * **Seq2seq “noiser”**: train a small transformer to map clean name → corrupted name using your rule-based outputs as supervision; then sample from it. This gives you diversity without hand-tuning every rule.
 * **Denoising autoencoder**: train to reconstruct clean from corrupted; during generation, run clean → latent → decode with noise to sample corruptions.
 * **Masked-LM** tuned on names: randomly mask characters/subtokens and let it predict plausible replacements (constrained to same script).
 
-### E) Rendering-based OCR corruption (heavy, most realistic)
+### E) Rendering-based OCR corruption (big effort to generate data)
 
-Render names with varied fonts/blur/noise, run OCR (e.g., Tesseract) to capture truly realistic OCR mistakes. This is compute-heavier but gold for OCR error profiles.
+Render names with varied fonts/blur/noise, run OCR (e.g. Tesseract/pytesseract ) to capture truly realistic OCR mistakes?
+
+  *  🚧(some) **OCR confusions**: rn↔m, l↔1, O↔0, B↔8, cl↔d, I↔l, c↔e, t↔f, é→e, diacritic loss, “.”→“,”, random insertions.
+
 
 ### F) Online augmentation during triplet mining (training-aware)
 
@@ -254,7 +268,6 @@ When forming triplets:
 
 * Generate **positives** by applying light, label-preserving transforms to the anchor (diacritic folding, particle join, nickname, transliteration cycle).
 * Generate **semi-hard negatives** by:
-
   * same surname, nearby given name (Levenshtein 1–2),
   * same initials, different given/surname,
   * phonetic collision but different dictionary identity,
