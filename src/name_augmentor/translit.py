@@ -115,17 +115,18 @@ def _maybe_autoload(lang: str) -> None:
         except Exception:
             pass
 
-    # ja via pykakasi
+    # ja via icu
     if lang == "ja":
         try:
-            import pykakasi  # type: ignore
-            kks = pykakasi.kakasi()
+            from icu import Transliterator  # type: ignore
+
+            tr = Transliterator.createInstance("Any-Latin; Title")
 
             def _ja(s: str) -> str:
-                res = kks.convert(s)
-                # possible result indices: ‘orig’, ‘kana’, ‘hira’, ‘hepburn’, ‘kunrei’, ‘passport’
-                return " ".join([(r.get("hepburn") or r.get("kunrei") or r.get("passport") or r.get("orig") or "") for r in res])
-            register_adapter("ja", "pykakasi_hepburn", _ja)
+                latin_transliteration = tr.transliterate(s)
+                return latin_transliteration
+            register_adapter("ja", "icu_ja", _ja)
+
         except Exception:
             pass
 

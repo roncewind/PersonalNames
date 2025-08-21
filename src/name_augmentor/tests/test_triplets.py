@@ -26,7 +26,7 @@ class TestTranslit(unittest.TestCase):
     # -------------------------------------------------------------------------
     def test_unknown_lang_noop(self):
         s = "名前"
-        out, name = transliterate(s, "ja")  # likely no pykakasi installed here
+        out, name = transliterate(s, "ja")
         # Either a transliteration if available, or the same string
         self.assertTrue(out == s or isinstance(out, str))
 

@@ -179,12 +179,14 @@ Ref. https://www.researchgate.net/publication/220746750_A_Ground_Truth_Dataset_f
     - [iso9](https://github.com/cjolowicz/iso9) - Abkhaz, Altay, Belarusian, Bulgarian, Buryat, Chuvash, Karachay-Balkar, Macedonian, Moldavian, Mongolian, Russian, Rusyn, Serbian, Udmurt, Ukrainian, and all Caucasian languages using páločka.
     - [arabic_buckwalter_transliteration](https://github.com/hayderkharrufa/arabic-buckwalter-transliteration) - arabic
     - [gimeltra](https://github.com/twardoch/gimeltra) - 20 scripts, specializing in those of Semitic origin, offering a simplified, abjad-only transliteration.
-    - [pykakasi](https://codeberg.org/miurahr/pykakasi) - Japanese in all it's flavors, GPL 3.0!!!?
     - [pypinyin](https://pypi.org/project/pypinyin/) - Chinese. Does "lazy pinyin" with no diacritics.  `from pypinyin import lazy_pinyin`
     - [cjklib](https://pypi.org/project/cjklib3/) - For Wade-Giles romanization.
-    - [unidecode](https://pypi.org/project/Unidecode/) - not language specific, strict unicode to ascii "romanitization"
     - [ai4bharat-transliteration](https://pypi.org/project/ai4bharat-transliteration/) - 21 major languages of the Indian subcontinent.
+
+  * Unfavorable license
     - [transliter](https://github.com/elibooklover/Transliter) - Korean, Japanese, Russian, Ukrainian, Bulgarian, Macedonian, Mongolian, Montenegrin, Serbian, and Tajiki. GPL 2.0 !!!!
+    - [pykakasi](https://codeberg.org/miurahr/pykakasi) - Japanese in all it's flavors, GPL 3.0!!!?
+    - [unidecode](https://pypi.org/project/Unidecode/) - not language specific, strict unicode to ascii "romanitization"  GPL 2.0 !!!!
 
   * Python packages not specific to transliteration, but to writing systems:
     - [alphabetic](https://github.com/Halvani/alphabetic) - retrieving script types of writing systems including alphabets, abjads, abugidas, syllabaries, logographs, featurals as well as Latin script codes. Can be used to classify the language of a given text
