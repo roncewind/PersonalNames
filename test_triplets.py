@@ -283,6 +283,9 @@ def plot_triplet_umap(model, triplets, path, sample_size=1000):
 # Build pair list of validation triplets
 def build_val_pairs_from_triplets(val_triplets):
     # positive and negatives for pairwise evaluation
+    # anchor - texts[0]
+    # positive - texts[1]
+    # negative - texts[2]
     pos = [(t.texts[0], t.texts[1], 1) for t in val_triplets]
     neg = [(t.texts[0], t.texts[2], 0) for t in val_triplets]
     # TODO: de-dup?
@@ -309,6 +312,7 @@ def embed_unique(model, texts, batch_size=2048):
 #   Accuracy at τ: proportion of correct pairs
 #   F1 at τ:  harmonic mean of precision and recall
 def evaluate_pairs(model, pairs, batch_size=2048, tau=None, select_tau_mode="max_f1", target_precision=0.995):
+    # pairs - (anchor, name, 1 or 0) 1 = positive, 0 = negative
     texts = sorted({t for a, b, _ in pairs for t in (a, b)})
     embeddings = embed_unique(model, texts, batch_size=batch_size)
     y_true, y_score = [], []
@@ -394,7 +398,7 @@ def evaluate_retrieval_faiss(model, val_triplets, Ks=(1, 5, 10), batch_query=819
     # Embed unique strings once, normalized so cosine sim == inner product
     to_embed = sorted(set(gallery) | set(uniq_q))
     emb_map = model.encode(
-        to_embed, batch_size=4096, convert_to_numpy=True, normalize_embeddings=True
+        to_embed, batch_size=int(batch_query / 2), convert_to_numpy=True, normalize_embeddings=True
     ).astype(np.float32, copy=False)
     tok2row = {t: i for i, t in enumerate(to_embed)}  # text to row in emb_map
 
@@ -512,9 +516,9 @@ if __name__ == "__main__":
 
     print("⏳ Evaluating tests...")
     print("⏳   Evaluating pairs...")
-    pair_stats = evaluate_pairs(model, validation_pairs, batch_size=2048, tau=args.tau, select_tau_mode="max_f1")
+    pair_stats = evaluate_pairs(model, validation_pairs, batch_size=(batch_size * 4), tau=args.tau, select_tau_mode="max_f1")
     print("⏳   Evaluating retrieval statistics...")
-    retrieval_stats = evaluate_retrieval_faiss(model, triplets, Ks=(1, 5, 10))
+    retrieval_stats = evaluate_retrieval_faiss(model, triplets, Ks=(1, 5, 10), batch_query=int(batch_size * 16))
     print("⏳   Evaluating triplet model...")
     accuracy, avg_gap, violations_rate, categories, best_threshold = evaluate_triplet_model(model, dataloader, args.margin, analysis_path)
     for key in categories:
