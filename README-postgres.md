@@ -1,5 +1,5 @@
 
-#### ANN method selection
+# ANN method selection
 
 - Approximate Nearest Neighbor (ANN) method depends on performance characteristics expected and maching configuration.
   - **IVFFLAT**: Inverted Flat File
