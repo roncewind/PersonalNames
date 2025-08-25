@@ -2,7 +2,7 @@ Table of Contents
 
 - [PostgreSQL vector database basic information](#Postgres-vector-database-basic-information)
 - [ANN method selection](#ANN-method-selection)
-- [Tau](Using-τ-tau-with-PostgreSQL-pgvector)
+- [Using Tau with pgvector](#Using-Tau-with-pgvector)
 ---
 ---
 
@@ -253,9 +253,11 @@ Bottom line, do your research and tune them appropriately
 
 ---
 
-# Using **τ (tau)** with PostgreSQL/pgvector
+# Using Tau with pgvector
 
- The only trick is remembering that pgvector's **cosine operator** returns a **distance**, not similarity.
+When using **τ (tau)** with PostgreSQL/pgvector there is one big thing to remember:
+
+  * Pgvector's **cosine operator** returns a **distance**, not similarity.
 
 ## Key mapping
 
