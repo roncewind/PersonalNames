@@ -1,3 +1,166 @@
+Table of Contents
+
+- [PostgreSQL vector database basic information](#Postgres-vector-database-basic-information)
+- [ANN method selection](#ANN-method-selection)
+- [Tau](Using-τ-tau-with-PostgreSQL-pgvector)
+---
+---
+
+# Postgres vector database basic information
+
+Install a Postgres vector database and import training data embeddings into it using a fine-tuned model.
+Further testing can be done using cosine distance and cosine similarity implemented in the Postgres
+vector database.
+
+### Install PostgreSQL
+
+```
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+```
+
+#### Switch to the postgres user and create a new db user/pwd if needed
+
+dbuser is the user your programs will use to access the database.
+
+```
+sudo -i -u postgres
+psql
+
+CREATE USER dbuser WITH PASSWORD 'dbpassword';
+CREATE DATABASE embeddings_db OWNER dbuser;
+\q
+```
+
+#### Exit out to sudo user
+
+```
+exit
+sudo apt install postgresql-server-dev-all
+git clone https://github.com/pgvector/pgvector.git
+cd pgvector
+make
+sudo make install
+```
+
+#### Launch psql again
+
+```
+sudo -u postgres psql -d embeddings_db
+CREATE EXTENSION vector;
+\q
+```
+
+#### give linux user permissions... just an example, optional
+
+```
+sudo -u postgres psql
+ALTER USER username WITH CREATEDB;
+```
+
+#### create an embeddings table to hold our data
+
+```
+CREATE TABLE embeddings (
+    id SERIAL PRIMARY KEY,
+    group_id TEXT,
+    canonical TEXT,
+    name TEXT NOT NULL,
+    language VARCHAR(50),
+    embedding vector(512)
+);
+```
+
+#### delete if needed
+
+```
+DROP TABLE IF EXISTS embeddings;
+```
+
+#### get information about the table
+
+```
+\d+ embeddings
+```
+
+#### give your db user permissions on the table and sequence ... just an example
+
+```
+psql
+GRANT ALL ON embeddings TO dbuser;
+GRANT ALL PRIVILEGES ON SEQUENCE embeddings_id_seq TO dbuser;
+```
+
+#### AFTER some data has beed added:
+
+- index for cosine similarity search
+- lists divides the data into clusters to speed up approximate nearest neighbor search
+- bigger lists = faster, but less accurate unless probes are increased
+- need to tune lists and probes based on data size and latecy vs accuracy needs.
+
+```
+CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+```
+
+#### FOR TUNING
+
+```
+SET ivfflat.probes = 10; --higher = more accurate, but slower
+```
+
+#### AFTER bulk inserts run
+
+```
+ANALYZE embeddings;
+```
+
+#### Useful index related SQL commands :
+
+#### drop the index if you created too soon:
+
+```
+DROP INDEX IF EXISTS embeddings_embedding_idx;
+```
+
+#### another way to created the index giving it a specified name. wonder what the default lists is???
+
+```
+CREATE INDEX embeddings_embedding_idx ON embeddings USING ivfflat (embedding vector_cosine_ops);
+```
+
+#### find indexes
+
+```
+\di embeddings*
+```
+
+#### or
+
+```
+SELECT indexname FROM pg_indexes WHERE tablename = 'embeddings';
+```
+
+#### example similarity search:
+
+Note: embedding `<=>` '[0.1, 0.2, ..., 0.3]' is the consine _distance_ operator
+It should also be noted that the `'[0.1, 0.2, ..., 0.3]'` is an embedding and as such, it's unlikely one would ever use this select manually from psql.
+
+```
+-- Find the top 5 most similar entries
+SELECT id, name, language, embedding <=> '[0.1, 0.2, ..., 0.3]' AS distance
+    FROM embeddings
+    ORDER BY embedding <=> '[0.1, 0.2, ..., 0.3]'
+    LIMIT 5;
+```
+
+it's far more likely that the above would be used in say a python program like:
+
+```
+cur.execute(f"SELECT id, group_id, name, language, embedding <=> %s::vector AS consine_distance FROM embeddings ORDER BY embedding <=> %s::vector LIMIT {top_count};",
+            (query_embedding.tolist(), query_embedding.tolist()),
+            )
+```
+---
 
 # ANN method selection
 
@@ -90,7 +253,7 @@ Bottom line, do your research and tune them appropriately
 
 ---
 
-# Using **τ (tau)** with PostgreSQL/pgvector.
+# Using **τ (tau)** with PostgreSQL/pgvector
 
  The only trick is remembering that pgvector's **cosine operator** returns a **distance**, not similarity.
 
