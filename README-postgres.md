@@ -249,7 +249,7 @@ Some teams:
 * Use **IVFFLAT for dev / iterative testing**
 * Switch to **HNSW for production search** once the data stabilizes
 
-Bottom line, do your research and tune them appropriately
+Bottom line, do your research and tune appropriately
 
 ---
 
