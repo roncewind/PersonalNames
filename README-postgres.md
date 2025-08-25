@@ -5,7 +5,7 @@
   - **IVFFLAT**: Inverted Flat File
   - **HNSW**: Hierarchical Navigable Small World Graph
 
-##### Quick Reference Table
+## Quick Reference Table
 
 | Feature                    | IVFFLAT                               | HNSW                                         |
 | -------------------------- | ------------------------------------- | -------------------------------------------- |
@@ -18,7 +18,7 @@
 | **Dynamic Insert Support** | Yes (very good for streaming inserts) | Not ideal (best with bulk static data)       |
 | **Best for**               | Large, frequently updated datasets    | Smaller static datasets, high-accuracy use   |
 
-##### **IVFFLAT**: Inverted Flat File
+## **IVFFLAT**: Inverted Flat File
   * Pros
     * Fast query times with proper tuning
     * Index builds quickly
@@ -42,7 +42,7 @@ CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lis
 SET ivfflat.probes = 10;
 ```
 
-##### **HNSW**: Hierarchical Navigable Small World Graph
+## **HNSW**: Hierarchical Navigable Small World Graph
   * Pros
     * **Very high recall**, near-exact
     * Very fast queries
@@ -69,7 +69,7 @@ SET hnsw.ef_search = 100;
 
 ---
 
-##### When to Use Which?
+## When to Use Which?
 
 | Scenario                                                   | Recommendation                        |
 | ---------------------------------------------------------- | ------------------------------------- |
@@ -79,7 +79,7 @@ SET hnsw.ef_search = 100;
 | You're running batch jobs or infrequent updates            | ✅ **HNSW**                            |
 | You're just getting started                                | ✅ Use IVFFLAT first — simpler to tune |
 
-##### Combo Strategy?
+## Combo Strategy?
 
 Some teams:
 
