@@ -1,4 +1,4 @@
-Table of Contents
+# Table of Contents
 
 - [PostgreSQL vector database basic information](#Postgres-vector-database-basic-information)
 - [ANN method selection](#ANN-method-selection)
