@@ -27,8 +27,8 @@ dbuser is the user your programs will use to access the database.
 sudo -i -u postgres
 psql
 
-CREATE USER dbuser WITH PASSWORD 'dbpassword';
-CREATE DATABASE embeddings_db OWNER dbuser;
+CREATE USER <dbuser> WITH PASSWORD '<dbpassword>';
+CREATE DATABASE <database> OWNER <dbuser>;
 \q
 ```
 
@@ -46,7 +46,7 @@ sudo make install
 #### Launch psql again
 
 ```
-sudo -u postgres psql -d embeddings_db
+sudo -u postgres psql -d <database>
 CREATE EXTENSION vector;
 \q
 ```
@@ -87,8 +87,8 @@ DROP TABLE IF EXISTS embeddings;
 
 ```
 psql
-GRANT ALL ON embeddings TO dbuser;
-GRANT ALL PRIVILEGES ON SEQUENCE embeddings_id_seq TO dbuser;
+GRANT ALL ON embeddings TO <dbuser>;
+GRANT ALL PRIVILEGES ON SEQUENCE embeddings_id_seq TO <dbuser>;
 ```
 
 #### AFTER some data has beed added:
@@ -251,6 +251,10 @@ Some teams:
 
 Bottom line, do your research and tune appropriately
 
+One additional tip:
+
+* Store **float4/float8** vectors; you **don't need** to pre-normalize for `<=>` to work, but normalizing in your app makes cosine consistent across systems and lets you switch to inner-product (`IndexFlatIP`) elsewhere without surprises.
+
 ---
 
 # Using Tau with pgvector
@@ -321,7 +325,7 @@ ORDER BY e.embedding <=> p.qv
 LIMIT p.k;
 ```
 
-For $\tau = 0.3016$, pass `max_dist = 0.6984`.
+For example if $\tau = 0.3016$, pass `max_dist = 0.6984`.
 
 **Note:** With IVFFlat/HNSW, the index is primarily used for the `ORDER BY … LIMIT`. The `WHERE` cutoff is applied as a filter; performance is still good in practice, but the pure top-K pattern (Option A) is the most index-friendly.
 
@@ -357,28 +361,6 @@ with psycopg.connect(conninfo) as conn, conn.cursor() as cur:
     rows = cur.fetchall()
     # rows already honor tau; if you used Option A, filter here instead
 ```
-
----
-
-## Indexing tips (pgvector)
-
-* Use cosine ops in the index:
-
-  ```sql
-  -- Fast approximate
-  CREATE INDEX ON embeddings USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
-
-  -- Or HNSW (often great out-of-the-box)
-  CREATE INDEX ON embeddings USING hnsw (embedding vector_cosine_ops) WITH (m = 16, ef_construction = 200);
-  ```
-
-* Tune probes (IVFFlat):
-
-  ```sql
-  SET ivfflat.probes = 10;   -- try 5–20 for recall/speed tradeoff
-  ```
-
-* Store **float4/float8** vectors; you **don't need** to pre-normalize for `<=>` to work, but normalizing in your app makes cosine consistent across systems and lets you switch to inner-product (`IndexFlatIP`) elsewhere without surprises.
 
 ---
 

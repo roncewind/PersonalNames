@@ -27,8 +27,6 @@ from datetime import datetime
 
 import orjson
 
-import script_classifier as script
-
 # -----------------------------------------------------------------------------
 # constants
 # -----------------------------------------------------------------------------

@@ -31,9 +31,9 @@ Grant privs as appropriate, but the dbuser needs to be able to read the tables.
 sudo -i -u postgres
 psql
 
-CREATE USER dbuser WITH PASSWORD 'dbpassword';
-CREATE DATABASE embeddings_db OWNER dbuser;
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO dbuser;
+CREATE USER <dbuser> WITH PASSWORD '<dbpassword>';
+CREATE DATABASE <database> OWNER dbuser;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO <dbuser>;
 
 \q
 ```
@@ -52,7 +52,7 @@ sudo make install
 #### Launch psql again
 
 ```
-sudo -u postgres psql -d embeddings_db
+sudo -u postgres psql -d <database>
 CREATE EXTENSION vector;
 \q
 ```
@@ -67,7 +67,7 @@ ALTER USER username WITH CREATEDB;
 #### Add Senzing schema
 
 ```
-psql -U <user> -d <database> -h <server> -W
+psql -U <dbuser> -d <database> -h <server> -W
 \i <senzing_project_path>/resources/schema/szcore-schema-postgresql-create.sql
 ```
 ---
@@ -88,7 +88,8 @@ CREATE INDEX ON SEMANTIC_VALUE USING ivfflat (embedding vector_cosine_ops) WITH 
 SET ivfflat.probes = 10;
 ```
 
-- Creating a new table and configuration for Peronal name embeddings:
+- Creating a new table and configuration for Peronal name embeddings
+- The table name will be used as the FTYPE_CODE in the Senzing configuration below.
 
 ```
 CREATE TABLE NAME_EMBEDDING (LIB_FEAT_ID BIGINT NOT NULL, EMBEDDING VECTOR(512), PRIMARY KEY(LIB_FEAT_ID));
@@ -118,7 +119,7 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
         "ATTR_ID": 2817,
         "ATTR_CODE": "NAME_EMBEDDING",
         "ATTR_CLASS": "IDENTIFIER",
-        "FTYPE_CODE": "NAME_EMBEDDINGS",
+        "FTYPE_CODE": "NAME_EMBEDDING",
         "FELEM_CODE": "EMBEDDING",
         "FELEM_REQ": "No",
         "DEFAULT_VALUE": null,
@@ -128,7 +129,7 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
         "ATTR_ID": 2818,
         "ATTR_CODE": "SEMANTIC_ALGORITHM",
         "ATTR_CLASS": "IDENTIFIER",
-        "FTYPE_CODE": "NAME_EMBEDDINGS",
+        "FTYPE_CODE": "NAME_EMBEDDING",
         "FELEM_CODE": "ALGORITHM",
         "FELEM_REQ": "No",
         "DEFAULT_VALUE": null,
@@ -201,7 +202,7 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
     },
     {
         "FTYPE_ID": 100,
-        "FTYPE_CODE": "NAME_EMBEDDINGS",
+        "FTYPE_CODE": "NAME_EMBEDDING",
         "FTYPE_DESC": "Peronal name embeddings",
         "FCLASS_ID": 7,
         "FTYPE_FREQ": "FF",
@@ -221,6 +222,8 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
 
 - Note that `"USED_FOR_CAND": "Yes",` was changed from No to Yes for SEMANTIC_VALUE too.
 
+#### Import the new config into Senzing
+
 - run
 
 ```
@@ -239,6 +242,7 @@ embedding Senzing has been configured with two tables and separate attribues to
 capture the data and embeddings.
 
 As such, in Senzing JSON, there are fields based on our configuration above.
+Note that the FTYPE_CODE should be the same for the JSON attribut as well as the table name.
 
 - SEMANTIC_EMBEDDING: used for Business name embeddings
 - NAME_EMBEDDING: used for Personal name embeddings
