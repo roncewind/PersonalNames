@@ -64,6 +64,15 @@ sudo -u postgres psql
 ALTER USER username WITH CREATEDB;
 ```
 
+#### make a few performance enhancements for Senzing, optional
+
+```
+ALTER DATABASE senzing SET synchronous_commit = OFF;
+ALTER DATABASE senzing SET enable_seqscan TO OFF;
+ALTER SYSTEM SET wal_writer_delay = '1000ms';
+SELECT pg_reload_conf();
+```
+
 #### Add Senzing schema
 
 ```
