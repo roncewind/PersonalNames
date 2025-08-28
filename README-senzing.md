@@ -6,7 +6,7 @@ for vector operations and some details about which ANN method to use.
 
 ## References:
 
-- https://senzing.com/docs/4_beta/quickstart_linux/
+- https://senzing.com/docs/quickstart_linux/
 - https://senzing.zendesk.com/hc/en-us/articles/360041965973-Setup-with-PostgreSQL some names changes for v4
 
 ## Postgres vector database
@@ -32,7 +32,7 @@ sudo -i -u postgres
 psql
 
 CREATE USER <dbuser> WITH PASSWORD '<dbpassword>';
-CREATE DATABASE <database> OWNER dbuser;
+CREATE DATABASE <database> OWNER <dbuser>;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO <dbuser>;
 
 \q
@@ -231,7 +231,7 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
 
 - Note that `"USED_FOR_CAND": "Yes",` was changed from No to Yes for SEMANTIC_VALUE too.
 
-#### Import the new config into Senzing
+#### Import the new config into Senzing and add the datasource
 
 - run
 
@@ -239,9 +239,31 @@ CFG_ATTR: the ATTR_CODE maps directly to the JSON data file attribute name.
 ./bin/sz_configtool
 
 importFromFile <filename>
+addDataSource OPEN_SANCTIONS
+listDataSources
+save
+
+```
+
+#### Set the Tau threshold for each embedding model
+
+- Multiply Tau by 100 and set that as the "likelyScore", distribute the rest as
+needed.
+- Look at similarity distribution histogram and use that to inform score decisions.
+
+```
+./bin/sz_configtool
+
+addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "SEMANTIC_VALUE", "sameScore": 80, "closeScore": 50, "likelyScore": 30, "plausibleScore": 20, "unlikelyScore": 10}
+
+addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "NAME_EMBEDDING", "sameScore": 80, "closeScore": 60, "likelyScore": 43, "plausibleScore": 30, "unlikelyScore": 20}
+
+listComparisonThresholds
 save
 quit
+
 ```
+
 
 #### Data for Senzing
 
@@ -301,5 +323,3 @@ if multiple:
   "SEMANTIC_EMBEDDINGS": [{"SEMANTIC_EMBEDDING": "[-0.021743419,...]"}, {"SEMANTIC_EMBEDDING": "[0.521743123,...]"}, ...]
 }
 ```
-
-
