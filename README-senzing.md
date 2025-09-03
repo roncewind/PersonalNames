@@ -6,7 +6,7 @@ for vector operations and some details about which ANN method to use.
 
 ## References:
 
-- https://senzing.com/docs/quickstart_linux/
+- https://senzing.com/docs/quickstart/quickstart_api/
 - https://senzing.zendesk.com/hc/en-us/articles/360041965973-Setup-with-PostgreSQL some names changes for v4
 
 ## Postgres vector database
