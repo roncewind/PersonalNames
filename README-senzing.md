@@ -158,9 +158,9 @@ needed.
 
 ```
 
-addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "NAME_EMBEDDING", "sameScore": 80, "closeScore": 60, "likelyScore": 43, "plausibleScore": 30, "unlikelyScore": 20}
+addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "BIZNAME_EMBEDDING", "sameScore": 80, "closeScore": 60, "likelyScore": 43, "plausibleScore": 30, "unlikelyScore": 20}
 
-addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "BIZ_NAME_EMBEDDING", "sameScore": 80, "closeScore": 50, "likelyScore": 30, "plausibleScore": 20, "unlikelyScore": 10}
+addComparisonThreshold {"function": "SEMANTIC_SIMILARITY_COMP", "returnOrder": 1, "scoreName": "FULL_SCORE", "feature": "NAME_EMBEDDING", "sameScore": 80, "closeScore": 50, "likelyScore": 30, "plausibleScore": 20, "unlikelyScore": 10}
 
 listComparisonThresholds
 save

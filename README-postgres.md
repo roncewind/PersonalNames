@@ -335,7 +335,7 @@ For example if $\tau = 0.3016$, pass `max_dist = 0.6984`.
 
 ```python
 import numpy as np
-import psycopg
+import psycopg2
 
 TAU = 0.3016
 TOP_K = 10
@@ -343,9 +343,9 @@ TOP_K = 10
 # qvec must be a 1-D float list the same length as your column's dimension
 qvec = model.encode([query_name], normalize_embeddings=True)[0].astype(np.float32).tolist()
 
-sql = """
+sql = f"""
 WITH params AS (
-  SELECT %s::vector AS qv, %s::float8 AS max_dist, %s::int AS k
+  SELECT %s::vector AS qv, %s::float8 AS max_dist
 )
 SELECT id, group_id, name, language,
        (embedding <=> p.qv) AS cosine_distance,
@@ -353,11 +353,11 @@ SELECT id, group_id, name, language,
 FROM embeddings e, params p
 WHERE (embedding <=> p.qv) <= p.max_dist
 ORDER BY embedding <=> p.qv
-LIMIT p.k;
+LIMIT {TOP_K};
 """
 
-with psycopg.connect(conninfo) as conn, conn.cursor() as cur:
-    cur.execute(sql, (qvec, 1.0 - TAU, TOP_K))
+with psycopg2.connect(conninfo) as conn, conn.cursor() as cur:
+    cur.execute(sql, (qvec, 1.0 - TAU))
     rows = cur.fetchall()
     # rows already honor tau; if you used Option A, filter here instead
 ```
